@@ -9,11 +9,11 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-MacOSX
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-MacOSX
-CND_ARTIFACT_NAME_Debug=gaddis_9thed_chap7_prob6_rainorshine_v2
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-MacOSX/gaddis_9thed_chap7_prob6_rainorshine_v2
+CND_ARTIFACT_NAME_Debug=gaddis_9thed_chap7_prob6_rainorshine
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-MacOSX/gaddis_9thed_chap7_prob6_rainorshine
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-MacOSX/package
-CND_PACKAGE_NAME_Debug=gaddis9thedchap7prob6rainorshinev2.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-MacOSX/package/gaddis9thedchap7prob6rainorshinev2.tar
+CND_PACKAGE_NAME_Debug=gaddis9thedchap7prob6rainorshine.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-MacOSX/package/gaddis9thedchap7prob6rainorshine.tar
 # Release configuration
 CND_PLATFORM_Release=Cygwin-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/Cygwin-Windows

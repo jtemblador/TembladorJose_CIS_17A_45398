@@ -24,12 +24,12 @@ int main(int argc, char** argv) {
     int num=1;
     int *thing=nullptr;
     
-//    thing=&num;
+    thing=&num;
     
     cout<<" Number is equal to "<<num<<endl;
     cout<<"Address is equal to "<<thing<<endl;
     
-//    thing+=1;
+    thing+=1;
     
     cout<<" Number is equal to "<<*thing<<endl;
 

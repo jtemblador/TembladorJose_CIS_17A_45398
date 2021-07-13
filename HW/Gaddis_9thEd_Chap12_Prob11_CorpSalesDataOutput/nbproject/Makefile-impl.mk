@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=Gaddis_9thEd_Chap12_Prob8_ArrayFileFunctions
+PROJECTNAME=Gaddis_9thEd_Chap12_Prob11_CorpSalesDataOutput
 
 # Active Configuration
 DEFAULTCONF=Debug

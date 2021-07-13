@@ -1,69 +1,66 @@
 /* 
  * File:   main.cpp
  * Author: Jose Temblador
- * Created on January 12, 2021, 12:19 PM
- * Purpose:  Binary File Problem
+ * Created on January 12, 2021, 8:20 PM
+ * Purpose:  Corporate sales output program
  */
 
 //System Libraries
 #include <iostream>  //I/O Library
 #include <fstream>
-#include <ctime>
-#include <cstdlib>
-#include <cstring>
 using namespace std;
 
 //User Libraries
 
 //Global Constants
 //Math, Science, Universal, Conversions, High Dimensioned Arrays
+const unsigned int SIZE=4;
+
+struct SalesData {
+    string dvname;       //division name North, South, East, West
+    char qrtr[SIZE];     //Quarter 1, 2, 3, 4
+    float qrtrsls[SIZE]; //sales of each quarter
+};
 
 //Function Prototypes
-void arrayToFile(string, int *, int );
-void fileToArray(string, int *, int );
+void DataIn (SalesData *, const unsigned int );
+void DataOut(SalesData *, const unsigned int );
 
 //Execution Begins Here
 int main(int argc, char** argv) {
+    SalesData qrtnme[SIZE];
     
-    const int SIZE=5;
-    string fileNme= "RandomNumbers.dat";
-    int a2f[SIZE], f2a[SIZE];
+    DataIn  (qrtnme, SIZE); //Data is read in by the user
+    DataOut (qrtnme, SIZE); //Data is read out to a file
     
-    
-    arrayToFile(fileNme, a2f, SIZE);
-    //Output data
-    fileToArray(fileNme, f2a, SIZE);
-    //Exit stage right!
-    cout<<"Run Complete!";
+    cout<<"Run Complete!\n";
     return 0;
 }
 
-void arrayToFile(string fileNme, int *a2f, int SIZE) {
-    //filling the array with random numbers [1-1000]
-    srand(static_cast<int>(time(0)));
-    ofstream outFile;
-    outFile.open(fileNme.c_str(), ios::binary|ios::out);    //open file for binary input
-    
-    for (int i=0; i<SIZE; i++) {
-        a2f[i]=rand()%100+1;   //filling array
-        outFile<<a2f[i]<<endl;  //filling file
+void DataOut(SalesData qrtnme[], const unsigned int SIZE) {
+    fstream fileOut;   //Creating file for output 
+    fileOut.open("SalesData.dat", ios::out); //opens file for output
+    for (int i=0;i<SIZE;i++) {
+        fileOut<<qrtnme[i].dvname<<" Division Sales Report:\n"; //reads out data in
+        for(int j=0;j<SIZE;j++) {                               //same order it's read in
+            fileOut<<"Quarter "<<static_cast<int>(qrtnme[i].qrtr[j])
+                <<" Sales: "<<qrtnme[i].qrtrsls[j]<<endl;
+        }
+        fileOut<<endl;
     }
-    
-    cout<<"Random numbers read into RandomNumbers.dat\n";
-    for (int i=0; i<SIZE; i++) {
-        cout<<a2f[i]<<endl;  //reading array to user
-    }
-    outFile.close();
+    fileOut.close();    //close file
 }
 
-void fileToArray(string fileNme, int *f2a, int SIZE) {
-    ifstream inFile;
-    inFile.open(fileNme.c_str(), ios::binary|ios::in);
+void DataIn(SalesData qrtnme[], const unsigned int SIZE) {
+    string nwes[4] = {"North", "West", "East", "South"};
     
-    cout<<"Numbers read from RandomNumbers.dat\n";
-    for(int i=0;i<SIZE;i++) {
-        inFile>>f2a[i];
-        cout<<f2a[i]<<endl;
+    for (int i=0;i<SIZE; i++) {
+        qrtnme[i].dvname=nwes[i];   //assigns each division its name 
+        for (int j=0;j<SIZE;j++) {
+            qrtnme[i].qrtr[j]=j+1; //starts at quarter 1
+            cout<<"Enter quarter "<<static_cast<int>(qrtnme[i].qrtr[j])
+                <<" sales for "<<qrtnme[i].dvname<<" Division:\n";
+            cin>>qrtnme[i].qrtrsls[j]; //loops until all sales for each quarter 
+        }                              //have been inputted
     }
-    inFile.close();
 }

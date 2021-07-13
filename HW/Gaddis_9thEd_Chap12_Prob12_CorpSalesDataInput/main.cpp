@@ -60,11 +60,7 @@ void DataIn(SalesData qrtnme[], const unsigned int SIZE) {
             qrtnme[i].qrtr[j]=j+1; //starts at quarter 1
             cout<<"Enter quarter "<<static_cast<int>(qrtnme[i].qrtr[j])
                 <<" sales for "<<qrtnme[i].dvname<<" Division:\n";
-            cin>>qrtnme[i].qrtrsls[j];    //loops until all sales for each 
-            if (qrtnme[i].qrtrsls[j]<0) { //quarter have been inputted
-                cout<<"Only positive numbers are allowed for input";
-                exit(1);
-            }
-        }
+            cin>>qrtnme[i].qrtrsls[j]; //loops until all sales for each quarter 
+        }                              //have been inputted
     }
 }

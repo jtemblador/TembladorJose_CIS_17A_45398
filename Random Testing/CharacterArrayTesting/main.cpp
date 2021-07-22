@@ -21,18 +21,14 @@ using namespace std;
 int main(int argc, char** argv) {
     //Seed the random number function
     
-    int num=1;
-    int *thing=nullptr;
+    char a[4]={0,1,2,3};
+    int num=0;
     
-    thing=&num;
-    
-    cout<<" Number is equal to "<<num<<endl;
-    cout<<"Address is equal to "<<thing<<endl;
-    
-    thing+=1;
-    
-    cout<<" Number is equal to "<<*thing<<endl;
-
+    for (int i=4;i<0;i--) {
+        num=num+static_cast<int>(a[i])*10;
+        //cout<<static_cast<int>(a[i])<<endl;
+    }
+    cout<<num<<endl;
     
     return 0;
 }

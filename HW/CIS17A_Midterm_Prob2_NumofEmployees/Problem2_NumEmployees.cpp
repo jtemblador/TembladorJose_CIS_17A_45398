@@ -15,7 +15,7 @@ using namespace std;
 #include "Paycheck.h"
 
 //Global Constants
-const float RTPAY=10.31;
+const float RTPAY=60.00;
 //Math, Science, Universal, Conversions, High Dimensioned Arrays
 
 //Function Prototypes

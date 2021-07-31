@@ -13,12 +13,23 @@
 
 #ifndef USER_H
 #define USER_H
+#include <string>
+using namespace std;
 
-struct User {
-    char *name[20];
-    unsigned int hand;
+
+class User {
+    private:
+        string name;
+        int hand;
+    public:
+        User();
+        ~User();
+        void setName(string);
+        void setHand(int);
+        void setHand(int, int);
+        int gethand() {return hand;}
+        string getName() {return name;}
 };
-
 
 
 #endif /* USER_H */

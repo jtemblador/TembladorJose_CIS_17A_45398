@@ -18,21 +18,23 @@ using namespace std;
 //User Libraries
 
 #include "User.h"
+#include "Dealer.h"
+#include "Cards.h"
 
 //Global Constants
 //Math, Science, Universal, Conversions, High Dimensioned Arrays
 
 //Function Prototypes
-User dlrHnd (string [], string [], int [], int , bool, int &, int &,
-             User [], unsigned char =0); //Gets dealer's hand
-void HorF (string [], string [], int &, int, bool, User [], int []); //Asks player to hit/fold
-bool checkAce (unsigned char &, bool , const User []);   //Player check ace function
+void dlrHnd (string [], CardInfo [], int [], int , bool, int &, int &,
+             Dealer &, unsigned char =0); //Gets dealer's hand
+void HorF (string [], CardInfo [], int &, int, bool, User &, int []); //Asks player to hit/fold
+bool checkAce (unsigned char &, bool , User);   //Player check ace function
 bool linSrch (string [], int [], int [], int , int );    //Linear Search Function
-bool checkAceDlr (unsigned char &, bool , int &);        //Dealer checkAce function 
+bool checkAceDlr (unsigned char &, bool , int );        //Dealer checkAce function 
 unsigned char rndmNum(unsigned char);   //Finds random number
 void SlSort(int [], int );              //Sorts the array 
 int *Fill (int [], int);                //creates and fills array 
-void PrintHand(int *, int, string []);  //Prints users hand
+void PrintHand(int *, int, CardInfo []);  //Prints users hand
 string ReadFile(fstream &input);
 
 //Execution Begins Here
@@ -40,11 +42,6 @@ int main(int argc, char** argv) {
     //Initialize the Random Number Seed
     srand(static_cast<unsigned int>(time(0)));
     //Declare Variables
-    User player[2];  //Player and dealer
-    User *p1ptr;     //pointer variable 
-    p1ptr=nullptr;
-    p1ptr=&player[0];   //pointer that is assigned address of player hand
-    player[0].hand=0;   //player one hand starts at 0
     const unsigned char nCards=52;  //number of cards in a deck
     const unsigned char MAXCARD=10; //Max number of cards a player can hold in their hand
     unsigned char rawnum=0;         //random number that is generated each time random function is called
@@ -55,13 +52,18 @@ int main(int argc, char** argv) {
         crdnms1[MAXCARD],           //name of card for index 1
         crdnms2[MAXCARD],           //name of card for index 2
         *crdnm1ptr=crdnms1;               //pointer array that points to hand of player 1
-    string allcards[nCards+1];//Array of all card suits and numbers
-    string cards[nCards+1];   //array of cards that are read in
-    string dlr[nCards+1];     //dealer's cards 
-    string winner;      //winner at the end of the game (user or dealer)
-    string rsltOut="results.dat",  //Output winner/loser
-           nmrdin;
-    bool ace=false;     //true if player has an ace, false if ont   
+    string allcards[nCards+1],//Array of all card suits and numbers
+           cards[nCards+1],   //array of cards that are read in
+           dlr[nCards+1],     //dealer's cards 
+           winner,      //winner at the end of the game (user or dealer)
+           rsltOut="results.dat",  //Output winner/loser
+           nmrdin,
+           dName="The Dealer";//string to be passed into dealer class 
+    bool ace=false;    //true if player has an ace, false if ont   
+    User player;    //Player and dealer
+    User *p1ptr;       //pointer variable 
+    Dealer dealer(dName, 0);
+    CardInfo crdsfile[nCards];
     
     //Variables for reading and writing to files
     fstream input, 
@@ -75,7 +77,9 @@ int main(int argc, char** argv) {
     
     for (int i=1; i<=nCards; i++) {
         input>>cardIn;          //file is read in and assigns 
-        allcards[i]=cardIn;     //all cards to array allcards
+        crdsfile[i].setCardNum(i);
+        crdsfile[i].setCardName(cardIn);
+        //allcards[i]=cardIn;     //all cards to array allcards
     }
 
     input.close();
@@ -83,55 +87,65 @@ int main(int argc, char** argv) {
     cout<<"Your name is being read through a file.\n";  
     
     nmrdin=ReadFile(input); //name is being read in 
+    player.setName(nmrdin); //name is copied to player structure
     
-    for (int i=0;i<nmrdin.length();i++)   
-        player[0].name[i]=&nmrdin[i];     //char array from structure is pointed to address string
-    binName.open("name2bin.dat", ios::out|ios::in|ios::binary); //binary file opened for input
-    binName.write(reinterpret_cast<char *> (player[0].name), sizeof(player[0].name)); //writing to binary file
-    binName.seekg(ios::beg);//reading from beginning of the file
-    binName.read(reinterpret_cast<char *> (player[0].name), sizeof(player[0].name)); //reading in 
-    binName.close();      //close file
-    
-    cout<<"Welcome, "<<*player[0].name<<"."<<endl;//char array is called 
+    cout<<"Welcome, "<<player.getName()<<"."<<endl;//char array is called 
     cout<<"*********************************************************************\n";
     
-    do {
-        rawnum=rndmNum(nCards);             //gets a random card number
-        crdnm1ptr[cardnum1]=rawnum;         //random card number is put into an array (players hand)
-        cards[cardnum1]=allcards[rawnum];   //assigns random card from card set to player hand
-        rawnum=rawnum%13;       //Mods card number by 13 to give it a value
-        
-        ace=checkAce(rawnum, ace, player);    //Checks to see if player has ace
-        
-        if (rawnum==0||rawnum==11||rawnum==12||rawnum==13) //Face cards equal 10
-            player[0].hand+=10;
-        else if (rawnum==14)   //first ace card is worth 11
-            player[0].hand+=11;
-        else player[0].hand+=rawnum;  //every other card is assigned its number value
-        
-        cout<<"Card number "<<cardnum1+1<<" is  "<<cards[cardnum1]<<endl<<
-              "Your hand is    "<<setw(3)<<player[0].hand<<endl<<endl;
-        cardnum1++;
-    } while (cardnum1<2);
+    int card1, card2;
+    //drawing first card
+    rawnum=rndmNum(nCards);             //gets a random card number
+    crdnm1ptr[0]=rawnum;         //random card number is put into an array (players hand)
+    cards[0]=crdsfile[rawnum].getCardName();   //assigns random card from card set to player hand
+    rawnum=rawnum%13;       //Mods card number by 13 to give it a value
+
+    ace=checkAce(rawnum, ace, player);    //Checks to see if player has ace
+
+    if (rawnum==0||rawnum==11||rawnum==12||rawnum==13) //Face cards equal 10
+        card1=10;
+    else if (rawnum==14)   //first ace card is worth 11
+        card1=11;
+    else card1=rawnum;  //every other card is assigned its number value
+    cout<<"Card number 1 is  "<<cards[0]<<endl<<
+          "Your hand is    "<<setw(3)<<card1<<endl<<endl;    
     
-    if (player[0].hand==21) //If hand reaches 21 after 2 cards, go straight to dealer turn
+    //Drawing second card
+    rawnum=rndmNum(nCards);             //gets a random card number
+    crdnm1ptr[1]=rawnum;         //random card number is put into an array (players hand)
+    cards[1]=crdsfile[rawnum].getCardName();   //assigns random card from card set to player hand
+    rawnum=rawnum%13;       //Mods card number by 13 to give it a value
+
+    ace=checkAce(rawnum, ace, player);    //Checks to see if player has ace
+
+    if (rawnum==0||rawnum==11||rawnum==12||rawnum==13) //Face cards equal 10
+        card2=10;
+    else if (rawnum==14)   //first ace card is worth 11
+        card2=11;
+    else card2=rawnum;  //every other card is assigned its number value
+    
+    player.setHand(card1, card2);
+
+    cout<<"Card number 2 is  "<<cards[1]<<endl<<
+          "Your hand is    "<<setw(3)<<player.gethand()<<endl<<endl;    
+    
+    if (player.gethand()==21) //If hand reaches 21 after 2 cards, go straight to dealer turn
         cout<<"Looks like your hand is already at 21\n"
               "Lets see what the dealer has.\n";
-    else HorF(cards, allcards, cardnum1, nCards, ace, player, crdnms1);//asks user if they want to continue
+    else HorF(cards, crdsfile, cardnum1, nCards, ace, player, crdnms1);//asks user if they want to continue
     cout<<"*********************************************************************\n";
     ace=false;
-    player[1]=dlrHnd (dlr, allcards, crdnms2, nCards, ace, cardnum2, dlrhand, player, rawnum);
+    dlrHnd (dlr, crdsfile, crdnms2, nCards, ace, cardnum2, dlrhand, dealer, rawnum);
     cout<<"*********************************************************************\n";
 
     SlSort(crdnms1, cardnum1);              //Sorts the players hand
     int *srtarry=Fill(crdnms1, cardnum1);   //Fills a dynamic array with the sorted array
-    cout<<*player[0].name<<", your cards in order are as follows. (Hearts>Clubs>Diamonds>Spades)\n";
-    PrintHand(srtarry, cardnum1, allcards);           //Prints the dynamic array
+    cout<<player.getName()<<", your cards in order are as follows. (Hearts>Clubs>Diamonds>Spades)\n";
+    PrintHand(srtarry, cardnum1, crdsfile);           //Prints the dynamic array
     
     out.open(rsltOut,ios::out);
-    unsigned int *hand=&player[0].hand;    //pointer variable created that points to address of player 1 hand 
-    out<<"Your hand is     "<<*hand<<".\n";         //displays hand of user 
-    out<<"Dealer's hand is "<<player[1].hand<<".\n";//displays hand of dealer 
+    //unsigned int *hand=&player[0].hand;    //pointer variable created that points to address of player 1 hand 
+    out<<"Your hand is         "<<player.gethand()<<".\n";         //displays hand of user 
+    out<<dealer.getName()<<"'s hand is "<<dealer.getHand()<<".\n";//displays hand of dealer 
  
             //If user and dealer hand is over 21, nobody wins
             //If user or dealer hand is over 21, opponent wins
@@ -139,30 +153,22 @@ int main(int argc, char** argv) {
             //greatest hand is determined the winner
             //If user wins, displays amount won
     
-    if ((player[0].hand>21)&&(player[1].hand>21)) out<<"You and the dealer went over. Nobody wins!\n";
-    else if (player[0].hand>21) out<<"You went over, the Dealer wins!"<<endl;
-    else if (player[1].hand>21) 
+    if ((player.gethand()>21)&&(dealer.getHand()>21)) 
+        out<<"You and the dealer went over. Nobody wins!\n";
+    else if (player.gethand()>21) 
+        out<<"You went over, the Dealer wins!"<<endl;
+    else if (dealer.getHand()>=21) 
     {
         out<<fixed<<setprecision(2);
-        out<<"The Dealer went over, "<<*player[0].name<<" wins!"<<endl;
-        out<<"\nYou won!";
+        out<<"The Dealer went over, "<<player.getName()<<" wins!"<<endl;
     }
     else
     {       //Ternary operator to determine winner
-        winner=(p1ptr->hand>player[1].hand)?"Congrats, you won!":
-               (p1ptr->hand>player[0].hand)?"The Dealer won.":"Tie! Nobody won.";
-        out<<winner<<endl;
-    }                                   //Added this last part that shows how
-    if (winner=="Congrats, you won!")   //much you won after betting
-    {                                   //in the beginning
-        out<<fixed<<setprecision(2);                           
-        out<<"The Dealer went over, "<<*p1ptr->name<<" wins!"<<endl;
-        out<<"\nYou won!";
+        (player.gethand()>dealer.getHand())? out<<"Congrats "<<player.getName()<<", you won!":
+        (dealer.getHand()>player.gethand())? out<<dealer.getName()<<" won.":
+            out<<"Tie! Nobody won.";
     }
- 
-        cout<<"\nThe game is over!\n"                                            
-        "Results are displayed in the output file named 'results.dat'\n";  
-        
+    
     //Exit the Program - Cleanup
     //No dynamic arrays to delete 
     input.close();
@@ -178,10 +184,9 @@ string ReadFile(fstream &input) {
     return namerdin;
 }
 
-
-void PrintHand(int *array, int size, string allcards []) {
+void PrintHand(int *array, int size, CardInfo crdsfile[]) {
     for (int i=0; i<size; i++) {
-        cout<<"Card "<<i+1<<" is "<<allcards[*(array+i)]<<endl;
+        cout<<"Card "<<i+1<<" is "<<crdsfile[*(array+i)].getCardName()<<endl;
     }
 }
 
@@ -206,35 +211,34 @@ void SlSort(int a[],int n){
     }
 }
 
-User dlrHnd (string dlr[], string allcards[], int crdnms2[], int nCards, bool ace, 
-             int &cardnum2, int &dlrhand,  User player[], unsigned char rawnum) {
-    dlrhand=0;
+void dlrHnd (string dlr[], CardInfo crdsfile[], int crdnms2[], int nCards, bool ace, 
+             int &cardnum2, int &dlrhand,  Dealer &dealer, unsigned char rawnum) {
     
+    //dealer.setHand(0);
     cout<<"It is now the Dealers turn.\n"<<endl;
-        while (dlrhand<=16)       //Once dealer reaches 16 or greater, loop ends
-    {                      
+    
+    while (dealer.getHand()<=16) {       //Once dealer reaches 16 or greater, loop ends                      
         rawnum=rndmNum(nCards);         //gets a random card number
         crdnms2[cardnum2]=rawnum;       //Raw Card number is put into an array (players hand)
-        dlr[cardnum2]=allcards[rawnum]; //assigns random card from card set to player hand
+        dlr[cardnum2]=crdsfile[rawnum].getCardName(); //assigns random card from card set to player hand
         rawnum=rawnum%13;               //Mods card number by 13 to give it a value
         
-        ace=checkAceDlr(rawnum, ace, dlrhand);    //Checks to see if player has ace
+        ace=checkAceDlr(rawnum, ace, dealer.getHand());    //Checks to see if player has ace
         
         if (rawnum==0||rawnum==11||rawnum==12||rawnum==13) //Face cards equal 10
-            dlrhand+=10;
+            dealer.setHand(10);
         else if (rawnum==14)   //first ace card is worth 11
-            dlrhand+=11;
-        else dlrhand+=rawnum;  //every other card is assigned its number value
+            dealer.setHand(11);
+        else dealer.setHand(rawnum);  //every other card is assigned its number value
         
-        cout<<"Card "<<cardnum2<<" is     "<<dlr[cardnum2]<<".\n";
-        cout<<"Dealer is at "<<setw(2)<<dlrhand<<".\n"<<endl;
+        cout<<"Card "<<cardnum2<<" is "<<dlr[cardnum2]<<".\n";
+        cout<<dealer.getName()<<" is at "<<dealer.getHand()<<".\n"<<endl;
         cardnum2++;
     } 
-    player[1].hand=dlrhand;
-    return player[1];
+    
 }
 
-bool checkAceDlr (unsigned char &rawnum, bool ace, int &hand) {//Dealer's checkAce function
+bool checkAceDlr (unsigned char &rawnum, bool ace, int a){//Dealer's checkAce function
     if (rawnum==1)
     {
         if (ace==true)
@@ -243,7 +247,7 @@ bool checkAceDlr (unsigned char &rawnum, bool ace, int &hand) {//Dealer's checkA
                   "This card will be worth 1.\n";
             return true;
         }
-        else if ((hand+rawnum+10)>21)
+        else if ((a+rawnum+10)>21)
         {   //if hand goes over 21, ace is worth 1
             cout<<"Dealer doesn't have an Ace, but he'll go over"<<
             " if it's counted as 11. This one counts as 1."<<endl;
@@ -259,8 +263,8 @@ bool checkAceDlr (unsigned char &rawnum, bool ace, int &hand) {//Dealer's checkA
     return false;
 }
 
-void HorF(string cards[], string allcards[], int &cardnum1, int nCards, 
-          bool ace, User player[], int crdnms1[]) {
+void HorF(string cards[], CardInfo crdsfile[], int &cardnum1, int nCards, 
+          bool ace, User &player, int crdnms1[]) {
     unsigned char decide;
     unsigned char rawnum=0;
     cout<<"Would you like to hit or fold?"<<endl<<
@@ -269,25 +273,25 @@ void HorF(string cards[], string allcards[], int &cardnum1, int nCards,
         cout<<endl;
         if (static_cast<int>(decide)=='h')  decide-=32;
         
-        for (cardnum1=2;decide=='H'&&player[0].hand<21;cardnum1++)  //Only repeats if decision is hit or
+        for (cardnum1=2;decide=='H'&&player.gethand()<21;cardnum1++)  //Only repeats if decision is hit or
     {                                                   //hand is below 21
         rawnum=rndmNum(nCards);             //gets a random card number
         crdnms1[cardnum1]=rawnum;            //Raw Card number is put into an array (players hand)
-        cards[cardnum1]=allcards[rawnum];
+        cards[cardnum1]=crdsfile[rawnum].getCardName();
         rawnum=rawnum%13;       //Mods card number by 13 to give it a value
         
         ace=checkAce(rawnum, ace, player);    //Checks to see if player has ace
         
         if (rawnum==0||rawnum==11||rawnum==12||rawnum==13) //Face cards equal 10
-            player[0].hand+=10; 
+            player.setHand(10); 
         else if (rawnum==14)   //first ace card is worth 11
-            player[0].hand+=11;
-        else player[0].hand+=rawnum;  //every other card is assigned its number value
+            player.setHand(11);
+        else player.setHand(rawnum);  //every other card is assigned its number value
         
         cout<<"Card number "<<cardnum1+1<<" is  "<<cards[cardnum1]<<endl<<
-              "Your hand is    "<<setw(3)<<player[0].hand<<endl<<endl;
+              "Your hand is    "<<setw(3)<<player.gethand()<<endl<<endl;
         
-        if (player[0].hand<21)
+        if (player.gethand()<21)
         {               //Asks player to hit or fold
             cout<<"Would you like to hit or fold?"<<endl<<
                   "Type H to hit or any other key to fold"<<endl;
@@ -297,7 +301,7 @@ void HorF(string cards[], string allcards[], int &cardnum1, int nCards,
     }
 }
 
-bool checkAce (unsigned char &rawnum, bool ace, const User player[]) {//User's checkAce function
+bool checkAce (unsigned char &rawnum, bool ace, User player) {//User's checkAce function
     if (rawnum==1)
     {
         if (ace==true)
@@ -306,7 +310,7 @@ bool checkAce (unsigned char &rawnum, bool ace, const User player[]) {//User's c
                   "This card will be worth 1.\n";
             return true;
         }
-        else if ((player[0].hand+rawnum+10)>21)
+        else if ((player.gethand()+rawnum+10)>21)
         {   //if hand goes over 21, ace is worth 1
             cout<<"You don't have an Ace, but you will go over"<<
             " if it's counted as 11. This one counts as 1."<<endl;

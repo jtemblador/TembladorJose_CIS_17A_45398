@@ -15,8 +15,7 @@ Dealer::Dealer() {
 }
 
 Dealer::~Dealer() {
-    cout<<"\nThe game is over!\n";
-    cout<<"Results are displayed in the output file named 'results.dat'\n";  
+        
 }
 
 Dealer::Dealer(string a, int b) {

@@ -34,14 +34,7 @@ class Prob2Sort {
                             test[i+1]=temp;
                         }
                     }
-                    else{
-                        if(test[i]<test[i+1]){
-                            swap=true;
-                            temp=test[i];
-                            test[i+1]=test[i];
-                            test[i+1]=temp;
-                        }
-                    }
+                    
                 }
             }while(swap==true);
             return test;
@@ -66,16 +59,7 @@ class Prob2Sort {
                                 test[(i+1)*x+j]=temp;
                             }
                         }
-                        else {
-                            if (test[i*x+col]>test[(i+1)*x+col]) {
-                                swap=true;
-                                for (int j=0; j<x;j++) {
-                                    temp=test[i*x+j];
-                                    test[i*x+j]=test[(i+1)*x+j];
-                                    test[(i+1)*x+j]=temp;
-                                }
-                            }
-                        }
+                        
                     }
                 }
             } while (swap==true);

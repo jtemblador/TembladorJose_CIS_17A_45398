@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 #include "Savings.h"
 using namespace std;
 
@@ -44,15 +45,15 @@ void SavingsAccount::toString(){
 }
 
 float SavingsAccount::Total(float savint, int time){
-    float tot=balance;
+    float tot=0;
     for(int i=0;i<time;i++)
-        tot=(tot*(0.1+savint));
-    return tot ;
+        tot=(tot+(balance*(0.1+savint)));
+    return tot;
+//    return balance*exp(time*log(1+savint));
+
 }
 
 float SavingsAccount::TotalRecursive(float savint, int time) {
-    float tot=0;
-    for(int i=0;i<time;i++)
-        tot=tot+(balance*(0.1+savint));
-    return tot ;
+    if (time<=0) return balance;
+    return TotalRecursive(savint, time-1)*(1+savint);
 }

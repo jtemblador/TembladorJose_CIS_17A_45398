@@ -13,9 +13,9 @@ using namespace std;
 Prob1Random::Prob1Random(const char a, const char *b) {
     numRand = 0;
     srand(static_cast<unsigned int>(time(0)));
-    nset = a;
-    set = new char [a]; //dynamically creating set array
-    freq = new int [a]; //dynamically creating frequency array
+    nset=a;
+    set = new char[a]; //dynamically creating set array
+    freq = new int[a]; //dynamically creating frequency array
     for (int i=0; i<a;i++) {
         set[i]=b[i];//filling structural array with pointed char array
         freq[i]=0;  //frequency of index i
